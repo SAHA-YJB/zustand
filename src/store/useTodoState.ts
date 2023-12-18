@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 interface TodoState {
   todos: { text: string; isCompleted: boolean; id: number }[];
@@ -12,26 +13,34 @@ function getId() {
   return id++;
 }
 
-export const useTodoState = create<TodoState>((set) => ({
-  todos: [],
-  addTodo: (todoText) =>
-    set((state) => ({
-      todos: [
-        { text: todoText, id: getId(), isCompleted: false },
-        ...state.todos,
-      ],
-    })),
-  removeTodo: (todoId) =>
-    set((state) => ({
-      todos: state.todos.filter((todo) => todo.id !== todoId),
-    })),
-  toggleTodo: (todoId) =>
-    set((state) => ({
-      todos: state.todos.map((todo) => {
-        if (todo.id === todoId) {
-          return { ...todo, isCompleted: !todo.isCompleted };
-        }
-        return todo;
-      }),
-    })),
-}));
+export const useTodoState = create<TodoState>()(
+  persist(
+    (set) => ({
+      todos: [],
+      addTodo: (todoText) =>
+        set((state) => ({
+          todos: [
+            { text: todoText, id: getId(), isCompleted: false },
+            ...state.todos,
+          ],
+        })),
+      removeTodo: (todoId) =>
+        set((state) => ({
+          todos: state.todos.filter((todo) => todo.id !== todoId),
+        })),
+      toggleTodo: (todoId) =>
+        set((state) => ({
+          todos: state.todos.map((todo) => {
+            if (todo.id === todoId) {
+              return { ...todo, isCompleted: !todo.isCompleted };
+            }
+            return todo;
+          }),
+        })),
+    }),
+    {
+      name: 'todo-storage',
+      getStorage: () => sessionStorage,
+    }
+  )
+);
