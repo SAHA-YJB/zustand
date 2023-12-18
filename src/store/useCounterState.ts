@@ -4,6 +4,7 @@ interface CounterState {
   count: number;
   inc: () => void;
   dec: () => void;
+  reset: () => void;
 }
 
 export const useCounterState = create<CounterState>((set) => ({
